@@ -36,7 +36,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             def rtDocker = Artifactory.docker server: server
 
             container('docker') {
-
+                sh("mkdir -p  /etc/docker/certs.d/test-docker-reg\\:5000")
+//                sh("cp ca.crt /etc/docker/certs.d/test-docker-reg\\:5000/")
                 docker.withRegistry(rtFullUrl, 'artifactorypass') {
                     groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
                     def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
