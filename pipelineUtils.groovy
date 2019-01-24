@@ -14,7 +14,7 @@ private getLatestArtifact (serverUrl ,repoName ,match ,type) {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactorypass',
                       usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 
-        def getAqlSearchUrl = "curl -u$USERNAME:$PASSWORD -X POST " + serverUrl + "/artifactory/api/search/aql -T " + aqlFile.getAbsolutePath()
+        def getAqlSearchUrl = "curl -u$USERNAME:$PASSWORD -X POST " + serverUrl + "/api/search/aql -T " + aqlFile.getAbsolutePath()
         echo getAqlSearchUrl
         try {
             println aqlString
