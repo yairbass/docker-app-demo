@@ -11,7 +11,7 @@ private getLatestArtifact (serverUrl ,repoName ,match ,type) {
     aqlFile.deleteOnExit()
     aqlFile << aqlString
 
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artCredId',
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactorypass',
                       usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 
         def getAqlSearchUrl = "curl -u$USERNAME:$PASSWORD -X POST " + serverUrl + "/artifactory/api/search/aql -T " + aqlFile.getAbsolutePath()
