@@ -39,11 +39,11 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 sh("mkdir -p  /etc/docker/certs.d/test-docker-reg\\:5000")
 
                 configFileProvider(
-                        [configFile(fileId: 'private_key',targetLocation : '/tmp/artifactory.crt' ,variable: 'KEY')]) {
+                        [configFile(fileId: 'private_key',targetLocation : '/tmp/' ,variable: 'KEY')]) {
                     echo " =========== ^^^^^^^^^^^^ Reading config from pipeline script "
-                    sleep 100000
-                    sh 'cp /tmp/artifactory.crt >> /etc/docker/certs.d/test-docker-reg\\:5000/'
-                    echo " =========== ~~~~~~~~~~~~ ============ "
+//                    sh '"cat ${env.KEY}" >> /etc/docker/certs.d/test-docker-reg\\:5000'
+                    sleep 100000s
+                    echo " =========== s~~~~~~~~~~~~ ============ "
                 }
 
 //                sh("cp ca.crt /etc/docker/certs.d/test-docker-reg\\:5000/")
