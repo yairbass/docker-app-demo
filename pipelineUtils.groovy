@@ -29,8 +29,8 @@ private getLatestArtifact (serverUrl ,repoName ,match ,type) {
     }
 }
 
-def downloadArtifact(repo ,artifact ,type , buildInfo ,explode) {
-    def lastArtifact = getLatestArtifact("http://" + ARTIFACTORY_URL , repo , artifact , type)
+def downloadArtifact(serverUrl ,repo ,artifact ,type , buildInfo ,explode) {
+    def lastArtifact = getLatestArtifact(serverUrl , repo , artifact , type)
     def latestVer = repo +  "/" + lastArtifact
 
     def downloadConfig = """{
