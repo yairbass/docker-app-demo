@@ -6,7 +6,10 @@ buildInfo = Artifactory.newBuildInfo()
 
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
-        containerTemplate(name: 'node', image: 'node:8', command: 'cat', ttyEnabled: true)]) {
+        containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'node', image: 'node:8', command: 'cat', ttyEnabled: true)
+    ] ,volumes: [
+        hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]) {
 
     node('jenkins-pipeline') {
 
@@ -33,19 +36,22 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
     stage('Docker build') {
         def rtDocker = Artifactory.docker server: server
 
-        docker.withRegistry(rtFullUrl, 'artifactorypass') {
-            groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
-            def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
+        container('docker') {
 
-            buildInfo.env.capture = true
+            docker.withRegistry(rtFullUrl, 'artifactorypass') {
+                groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+                def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
 
-            docker.build(dockerImageTag, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
-            docker.build(dockerImageTagLatest, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
+                buildInfo.env.capture = true
+
+                docker.build(dockerImageTag, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
+                docker.build(dockerImageTagLatest, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
 
 
-            rtDocker.push(dockerImageTag ,"docker-local", buildInfo)
-            rtDocker.push(dockerImageTagLatest ,"docker-local", buildInfo)
-            server.publishBuildInfo buildInfo
+                rtDocker.push(dockerImageTag, "docker-local", buildInfo)
+                rtDocker.push(dockerImageTagLatest, "docker-local", buildInfo)
+                server.publishBuildInfo buildInfo
+            }
         }
     }
 
