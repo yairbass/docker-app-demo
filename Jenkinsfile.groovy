@@ -41,7 +41,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 configFileProvider(
                         [configFile(fileId: 'private_key', variable: 'KEY')]) {
                     echo " =========== ^^^^^^^^^^^^ Reading config from pipeline script "
-                    sh "cat ${env.KEY}"
+                    sh '"cat ${env.KEY}" >> /etc/docker/certs.d/test-docker-reg\\:5000'
                     echo " =========== ~~~~~~~~~~~~ ============ "
                 }
 
