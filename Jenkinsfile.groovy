@@ -39,23 +39,27 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 sh("mkdir -p  /etc/docker/certs.d/test-docker-reg\\:5000")
 
                 configFileProvider(
-                        [configFile(fileId: 'private_key', targetLocation: '/etc/docker/certs.d/test-docker-reg\\:5000' , variable: 'KEY')]) {
+                        [configFile(fileId: 'private_key',targetLocation : '/tmp/artifactory.crt' ,variable: 'KEY')]) {
+                    echo " =========== ^^^^^^^^^^^^ Reading config from pipeline script "
+                    sh 'cp /tmp/artifactory.crt >> /etc/docker/certs.d/test-docker-reg\\:5000'
+                    echo " =========== ~~~~~~~~~~~~ ============ "
                 }
 
-                docker.withRegistry(rtFullUrl, 'artifactorypass') {
-                    groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
-                    def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
-
-                    buildInfo.env.capture = true
-
-                    docker.build(dockerImageTag, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
-                    docker.build(dockerImageTagLatest, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
-
-
-                    rtDocker.push(dockerImageTag, "docker-local", buildInfo)
-                    rtDocker.push(dockerImageTagLatest, "docker-local", buildInfo)
-                    server.publishBuildInfo buildInfo
-                }
+//                sh("cp ca.crt /etc/docker/certs.d/test-docker-reg\\:5000/")
+//                docker.withRegistry(rtFullUrl, 'artifactorypass') {
+//                    groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+//                    def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
+//
+//                    buildInfo.env.capture = true
+//
+//                    docker.build(dockerImageTag, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
+//                    docker.build(dockerImageTagLatest, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
+//
+//
+//                    rtDocker.push(dockerImageTag, "docker-local", buildInfo)
+//                    rtDocker.push(dockerImageTagLatest, "docker-local", buildInfo)
+//                    server.publishBuildInfo buildInfo
+//                }
             }
         }
     }
