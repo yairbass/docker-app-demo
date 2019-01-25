@@ -44,6 +44,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 //                    sh "cat ${env.KEY} >> /etc/docker/certs.d/test-docker-reg\\:5000/arti.crt"
 //                    echo " =========== ~~~~~~~~~~~~ ============ "
 //                }
+                sleep 10000
 
                 docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
                     groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
