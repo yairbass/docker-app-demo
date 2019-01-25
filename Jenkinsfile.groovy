@@ -39,8 +39,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 configFileProvider(
                         [configFile(fileId: 'private_key', variable: 'KEY')]) {
                     echo " =========== ^^^^^^^^^^^^ Reading222 config from pipeline script "
-                    sh("mkdir -p  /etc/docker/certs.d/test-docker-reg\\:5000")
-                    sh "cat ${env.KEY} >> /etc/docker/certs.d/test-docker-reg\\:5000/arti.crt"
+                    sh("mkdir -p  /etc/docker/certs.d/docker.artifactory.jfrog.com\\:5000")
+                    sh "cat ${env.KEY} >> /etc/docker/certs.d/docker.artifactory.jfrog.com\\:5000/arti.crt"
                     echo " =========== ~~~~~~~~~~~~ ============ "
                 }
 
