@@ -40,7 +40,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 
                 configFileProvider(
                         [configFile(fileId: 'private_key', variable: 'private_key')]) {
-                    println $private_key
+                    println ${env.private_key}
                 }
 
 //                sh("cp ca.crt /etc/docker/certs.d/test-docker-reg\\:5000/")
