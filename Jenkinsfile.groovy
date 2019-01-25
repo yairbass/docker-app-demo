@@ -8,7 +8,8 @@ buildInfo = Artifactory.newBuildInfo()
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'node', image: 'node:8', command: 'cat', ttyEnabled: true)
-]) {
+] ,volumes: [
+        hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]) {
 
     node('jenkins-pipeline') {
 
@@ -36,13 +37,13 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 
             container('docker') {
 
-                configFileProvider(
-                        [configFile(fileId: 'private_key', variable: 'KEY')]) {
-                    echo " =========== ^^^^^^^^^^^^ Reading222 config from pipeline script "
-                    sh("mkdir -p  /etc/docker/certs.d/docker.artifactory.jfrog.com\\:5000")
-                    sh "cat ${env.KEY} >> /etc/docker/certs.d/docker.artifactory.jfrog.com\\:5000/arti.crt"
-                    echo " =========== ~~~~~~~~~~~~ ============ "
-                }
+//                configFileProvider(
+//                        [configFile(fileId: 'private_key', variable: 'KEY')]) {
+//                    echo " =========== ^^^^^^^^^^^^ Reading222 config from pipeline script "
+//                    sh("mkdir -p  /etc/docker/certs.d/test-docker-reg\\:5000")
+//                    sh "cat ${env.KEY} >> /etc/docker/certs.d/test-docker-reg\\:5000/arti.crt"
+//                    echo " =========== ~~~~~~~~~~~~ ============ "
+//                }
 
                 docker.withRegistry(rtFullUrl, 'artifactorypass') {
                     groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
