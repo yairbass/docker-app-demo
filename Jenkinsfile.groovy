@@ -36,17 +36,14 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             def rtDocker = Artifactory.docker server: server
 
             container('docker') {
-//                sleep 10000
-
                 docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
-                    sleep 100000
                     groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
                     def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
 
                     buildInfo.env.capture = true
 
-                    docker.build(dockerImageTag, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
-                    docker.build(dockerImageTagLatest, "--build-arg DOCKER_REGISTRY_URL=docker.artifactory.jfrog.com .")
+                    docker.build(dockerImageTag)
+                    docker.build(dockerImageTagLatest)
 
 
                     rtDocker.push(dockerImageTag, "docker-local", buildInfo)
