@@ -13,7 +13,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 
     node('jenkins-pipeline') {
 
-        stage ('Cleanup') {
+        stage('Cleanup') {
             cleanWs()
         }
 
@@ -21,11 +21,11 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             git url: 'https://github.com/eladh/docker-app-demo.git', credentialsId: 'github'
         }
 
-        stage ('Download Dependencies') {
+        stage('Download Dependencies') {
             try {
                 def pipelineUtils = load 'pipelineUtils.groovy'
-                pipelineUtils.downloadArtifact(rtFullUrl ,"gradle-local" ,"*demo-gradle/*" ,"jar" ,buildInfo,false)
-                pipelineUtils.downloadArtifact(rtFullUrl ,"npm-local" ,"*client-app*" ,"tgz" ,buildInfo ,true)
+                pipelineUtils.downloadArtifact(rtFullUrl, "gradle-local", "*demo-gradle/*", "jar", buildInfo, false)
+                pipelineUtils.downloadArtifact(rtFullUrl, "npm-local", "*client-app*", "tgz", buildInfo, true)
             } catch (Exception e) {
                 println "Caught Exception during resolution. Message ${e.message}"
                 throw e as java.lang.Throwable
@@ -52,17 +52,16 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 }
             }
         }
-    }
 
+        stage('Docker Integration Tests') {
 
-
-
-    stage('Docker Integration Tests') {
-        groovy.lang.GString tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
-        docker.image(tag).withRun('-p 9191:81 -e “SPRING_PROFILES_ACTIVE=local” ') {c ->
-            sleep 10
-            def stdout = sh(script: 'curl "http://localhost:9191/index.html"', returnStdout: true)
-            println stdout
+            container('docker') {
+                docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
+                    groovy.lang.GString tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+                    docker.image(tag).withRun('-p 9191:81 -e “SPRING_PROFILES_ACTIVE=local” ') { c ->
+                        sleep 10
+                        def stdout = sh(script: 'curl "http://localhost:9191/index.html"', returnStdout: true)
+                        println stdout
 //            if (stdout.contains("client-app")) {
 //                println "*** Passed Test: " + stdout
 //                println "*** Passed Test"
@@ -71,8 +70,14 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 //                println "*** Failed Test: " + stdout
 //                return false
 //            }
+                    }
+                }
+            }
         }
     }
+
+
+
 
 //    stage('Helm install') {
 //        docker.image('docker.bintray.io/jfrog/jfrog-cli-go:latest').inside {
@@ -115,4 +120,4 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 //    }
 
 
-}
+//    }
