@@ -36,6 +36,9 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             def rtDocker = Artifactory.docker server: server
 
             container('docker') {
+
+                sh 'apk --no-cache add shadow'
+                sh 'usermod -a -G docker jenkins'
                 docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
                     groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
                     def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
@@ -44,7 +47,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 
                     docker.build(dockerImageTag)
                     docker.build(dockerImageTagLatest)
-                    
+
 
                     rtDocker.push(dockerImageTag, "docker", buildInfo)
                     rtDocker.push(dockerImageTagLatest, "docker", buildInfo)
