@@ -6,7 +6,7 @@ buildInfo = Artifactory.newBuildInfo()
 
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
-        containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true),
         containerTemplate(name: 'node', image: 'node:8', command: 'cat', ttyEnabled: true)
 ] ,volumes: [
         hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]) {
@@ -38,7 +38,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             container('docker') {
 
                 sh 'apk --no-cache add shadow'
-                sh 'usermod -a -G docker jenkins'
+//                sh 'usermod -a -G docker jenkins'
                 docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
                     groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
                     def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
