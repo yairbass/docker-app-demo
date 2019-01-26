@@ -1,3 +1,4 @@
+ARG DOCKER_REGISTRY_URL
 # Environment integration latest java 8 docker image
 FROM ${DOCKER_REGISTRY_URL}/openjdk:8u181-jre-alpine3.8
 
