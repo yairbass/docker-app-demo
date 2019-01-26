@@ -1,4 +1,4 @@
-ARG DOCKER_REGISTRY_URL
+# ARG DOCKER_REGISTRY_URL
 # Environment integration latest java 8 docker image
 FROM docker.artifactory.jfrog.com/openjdk:8u181-jre-alpine3.8
 
