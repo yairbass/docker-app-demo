@@ -57,12 +57,12 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 
 
 
-//    stage('Docker Integration Tests') {
-//        groovy.lang.GString tag = "${rtIpAddress}/docker-app:${env.BUILD_NUMBER}"
-//        docker.image(tag).withRun('-p 9191:81 -e “SPRING_PROFILES_ACTIVE=local” ') {c ->
-//            sleep 10
-//            def stdout = sh(script: 'curl "http://localhost:9191/index.html"', returnStdout: true)
-//            println stdout
+    stage('Docker Integration Tests') {
+        groovy.lang.GString tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+        docker.image(tag).withRun('-p 9191:81 -e “SPRING_PROFILES_ACTIVE=local” ') {c ->
+            sleep 10
+            def stdout = sh(script: 'curl "http://localhost:9191/index.html"', returnStdout: true)
+            println stdout
 //            if (stdout.contains("client-app")) {
 //                println "*** Passed Test: " + stdout
 //                println "*** Passed Test"
@@ -71,8 +71,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 //                println "*** Failed Test: " + stdout
 //                return false
 //            }
-//        }
-//    }
+        }
+    }
 
 //    stage('Helm install') {
 //        docker.image('docker.bintray.io/jfrog/jfrog-cli-go:latest').inside {
