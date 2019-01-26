@@ -75,6 +75,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             }
         }
     }
+}
 
 
 
