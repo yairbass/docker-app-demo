@@ -46,8 +46,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                     docker.build(dockerImageTagLatest)
 
 
-                    rtDocker.push(dockerImageTag, "docker-local", buildInfo)
-                    rtDocker.push(dockerImageTagLatest, "docker-local", buildInfo)
+                    rtDocker.push(dockerImageTag, "docker", buildInfo)
+                    rtDocker.push(dockerImageTagLatest, "docker", buildInfo)
                     server.publishBuildInfo buildInfo
                 }
             }
