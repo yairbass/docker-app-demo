@@ -37,6 +37,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 
             container('docker') {
                 docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
+                    sh 'chmod 664 /var/run/docker.sock'
                     groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
                     def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
 
@@ -46,8 +47,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                     docker.build(dockerImageTagLatest)
 
 
-                    rtDocker.push(dockerImageTag, "docker", buildInfo)
-                    rtDocker.push(dockerImageTagLatest, "docker", buildInfo)
+                    rtDocker.push(dockerImageTag, "docker-local", buildInfo)
+                    rtDocker.push(dockerImageTagLatest, "docker-local", buildInfo)
                     server.publishBuildInfo buildInfo
                 }
             }
