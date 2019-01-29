@@ -55,12 +55,16 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         }
 
         stage('Docker Integration Tests') {
+            // interesting case container inside container
+            container('docker') {
+                docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
+                    groovy.lang.GString tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+                    sh "docker run -d -p 9191:81 -e '“SPRING_PROFILES_ACTIVE=local”' " +
+                            "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
 
-            docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
-                groovy.lang.GString tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
-                docker.image(tag).withRun('-p 81:81 -e “SPRING_PROFILES_ACTIVE=local” ') { c ->
-                    sleep 30
-                    def stdout = sh(script: 'wget "http://localhost:81/index.html"', returnStdout: true)
+                    sh 'nc -zv localhost 9191'
+
+                    def stdout = sh(script: 'wget "http://localhost:9191/index.html"', returnStdout: true)
                     if (stdout.contains("client-app")) {
                         println "*** Passed Test: " + stdout
                         return true
@@ -71,7 +75,6 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 }
             }
         }
-
     }
 }
 
