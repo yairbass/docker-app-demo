@@ -7,12 +7,9 @@ buildInfo = Artifactory.newBuildInfo()
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true),
-        containerTemplate(name: 'dind', image: 'docker:dind', command: 'cat',
-                ttyEnabled: true , privileged: true  , envVars: [
-                envVar(key: 'LOG', value: 'file')
-        ]),
         containerTemplate(name: 'node', image: 'node:8', command: 'cat', ttyEnabled: true)
-] ,volumes: []) {
+] ,volumes: [
+        hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]) {
 
     node('jenkins-pipeline') {
 
@@ -24,23 +21,58 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             git url: 'https://github.com/eladh/docker-app-demo.git', credentialsId: 'github'
         }
 
-        stage('Download Dependencies') {
-            try {
-                def pipelineUtils = load 'pipelineUtils.groovy'
-                pipelineUtils.downloadArtifact(rtFullUrl, "gradle-local", "*demo-gradle/*", "jar", buildInfo, false)
-                pipelineUtils.downloadArtifact(rtFullUrl, "npm-local", "*client-app*", "tgz", buildInfo, true)
-            } catch (Exception e) {
-                println "Caught Exception during resolution. Message ${e.message}"
-                throw e as java.lang.Throwable
+
+        stage('Docker Integration Tests') {
+            docker.image("docker:dind").withRun('-d ') { c ->
+                sh 'docker ps'
             }
         }
 
-        stage('Docker build') {
-            def rtDocker = Artifactory.docker server: server
-
-            container('dind') {
-                sleep 100000
-            }
-        }
     }
 }
+
+
+
+
+//    stage('Helm install') {
+//        docker.image('docker.bintray.io/jfrog/jfrog-cli-go:latest').inside {
+//            sh "ls"
+//        }
+//
+//    }
+//
+//    //Scan Build Artifacts in Xray
+//    stage('Xray Scan') {
+//        if (XRAY_SCAN == "YES") {
+//            java.util.LinkedHashMap<java.lang.String, java.lang.Boolean> xrayConfig = [
+//                    'buildName' : env.JOB_NAME,
+//                    'buildNumber' : env.BUILD_NUMBER,
+//                    'failBuild' : false
+//            ]
+//            def xrayResults = server.xrayScan xrayConfig
+//
+//            if (xrayResults.isFoundVulnerable()) {
+//                error('Stopping early… got Xray issues ')
+//            }
+//        } else {
+//            println "No Xray scan performed. To enable set XRAY_SCAN = YES"
+//        }
+//    }
+//
+//    stage('Promote Docker image') {
+//        java.util.LinkedHashMap<java.lang.String, java.lang.Object> promotionConfig = [
+//                'buildName'  : buildInfo.name,
+//                'buildNumber': buildInfo.number,
+//                'targetRepo' : "docker-prod-local",
+//                'comment'    : 'This is a stable docker image',
+//                'status'     : 'Released',
+//                'sourceRepo' : 'docker-stage-local',
+//                'copy'       : true,
+//                'failFast'   : true
+//        ]
+//
+//        server.promote promotionConfig
+//    }
+
+
+//    }
