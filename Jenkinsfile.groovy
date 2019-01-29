@@ -36,6 +36,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             def rtDocker = Artifactory.docker server: server
 
             container('docker-inside-docker') {
+                sleep 100000
                 docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
                     sh 'chmod 777 /var/run/docker.sock'
                     groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
