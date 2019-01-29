@@ -9,8 +9,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true),
         containerTemplate(name: 'docker-inside-docker', image: 'docker:dind', command: 'cat', ttyEnabled: true , privileged: true),
         containerTemplate(name: 'node', image: 'node:8', command: 'cat', ttyEnabled: true)
-] ,volumes: [
-        hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]) {
+] ,volumes: []) {
 
     node('jenkins-pipeline') {
 
@@ -36,7 +35,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         stage('Docker build') {
             def rtDocker = Artifactory.docker server: server
 
-            container('docker') {
+            container('docker-inside-docker') {
                 docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
                     sh 'chmod 777 /var/run/docker.sock'
                     groovy.lang.GString dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
