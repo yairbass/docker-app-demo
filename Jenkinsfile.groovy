@@ -55,25 +55,30 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         }
 
         stage('Docker Integration Tests') {
+
+            //todo -http://pietervogelaar.nl/jenkinsfile-docker-pipeline-multi-stage
             // interesting case container inside container
             container('docker') {
-                docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
-                    groovy.lang.GString tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
-                    sh "docker run -d -p 9191:81 -e '“SPRING_PROFILES_ACTIVE=local”' " +
-                            "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+                try {
+                    docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
+                        groovy.lang.GString tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+                        sh "docker run -d --name test-app -p 9595:81 -e '“SPRING_PROFILES_ACTIVE=local”' " +
+                                "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
 
-                    sleep 25
-
-                    def stdout = sh(script: 'wget "http://localhost:9191/index.html"', returnStdout: true)
-                    println stdout
-                    if (stdout.contains("client-app")) {
-                        println "*** Passed Test: " + stdout
-                        return true
-                    } else {
-                        println "*** Failed Test: " + stdout
-                        return false
+                        sleep 30
+                        def stdout = sh(script: 'wget "http://localhost:9595/index.html"', returnStdout: true)
+                        if (stdout.contains("client-app")) {
+                            println "*** Passed Test: " + stdout
+                            return true
+                        } else {
+                            println "*** Failed Test: " + stdout
+                            return false
+                        }
                     }
+                } finally {
+                    sh 'docker ps -f name=test-app -q | xargs --no-run-if-empty docker container stop'
                 }
+
             }
         }
     }
