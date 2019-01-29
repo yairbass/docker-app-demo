@@ -61,11 +61,12 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             container('docker') {
                 try {
                     docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
-                        groovy.lang.GString tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+                        tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+                        sleep 1000000
+
                         sh "docker run -d --name test-app -p 9595:81 -e '“SPRING_PROFILES_ACTIVE=local”' " +
                                 "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
 
-                        sleep 30
                         def stdout = sh(script: 'wget "http://localhost:9595/index.html"', returnStdout: true)
                         if (stdout.contains("client-app")) {
                             println "*** Passed Test: " + stdout
