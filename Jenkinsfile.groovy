@@ -62,9 +62,10 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                     sh "docker run -d -p 9191:81 -e '“SPRING_PROFILES_ACTIVE=local”' " +
                             "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
 
-                    sh 'nc -zv localhost 9191'
+                    sleep 25
 
                     def stdout = sh(script: 'wget "http://localhost:9191/index.html"', returnStdout: true)
+                    println stdout
                     if (stdout.contains("client-app")) {
                         println "*** Passed Test: " + stdout
                         return true
