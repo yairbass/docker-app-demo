@@ -51,7 +51,6 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             }
         }
     }
-}
 
 podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'dind', image: 'odavid/jenkins-jnlp-slave:latest',
@@ -93,25 +92,25 @@ podTemplate(label: 'xray-scan-pipeline' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true)],
         volumes: [hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')])
 
-node('xray-scan-pipeline') {
-    //Scan Build Artifacts in Xray
-    stage('Xray Scan') {
-        if (XRAY_SCAN == "YES") {
-            java.util.LinkedHashMap<java.lang.String, java.lang.Boolean> xrayConfig = [
-                    'buildName' : env.JOB_NAME,
-                    'buildNumber' : env.BUILD_NUMBER,
-                    'failBuild' : false
-            ]
-            def xrayResults = server.xrayScan xrayConfig
+    node('xray-scan-pipeline') {
+        //Scan Build Artifacts in Xray
+        stage('Xray Scan') {
+            if (XRAY_SCAN == "YES") {
+                java.util.LinkedHashMap<java.lang.String, java.lang.Boolean> xrayConfig = [
+                        'buildName' : env.JOB_NAME,
+                        'buildNumber' : env.BUILD_NUMBER,
+                        'failBuild' : false
+                ]
+                def xrayResults = server.xrayScan xrayConfig
 
-            if (xrayResults.isFoundVulnerable()) {
-                error('Stopping early… got Xray issues ')
+                if (xrayResults.isFoundVulnerable()) {
+                    error('Stopping early… got Xray issues ')
+                }
+            } else {
+                println "No Xray scan performed. To enable set XRAY_SCAN = YES"
             }
-        } else {
-            println "No Xray scan performed. To enable set XRAY_SCAN = YES"
         }
     }
-}
 
 
 
