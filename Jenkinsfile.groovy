@@ -55,23 +55,20 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 }
             }
         }
+    }
+}
 
-        stage('Bla') {
-            podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
-                    containerTemplate(name: 'dind', image: 'odavid/jenkins-jnlp-slave:latest', envVars: [envVar(key: 'DIND', value: 'true')]
-                            ,command: '/usr/local/bin/wrapdocker', ttyEnabled: true , privileged: true)]) {
+podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
+        containerTemplate(name: 'dind', image: 'odavid/jenkins-jnlp-slave:latest', envVars: [envVar(key: 'DIND', value: 'true')]
+                ,command: '/usr/local/bin/wrapdocker', ttyEnabled: true , privileged: true)]) {
 
-                node('dind-template') {
-                    stage('Docker dind') {
-                        container('dind') {
-                            docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
-                                sh("docker ps")
-                            }
-                        }
-                    }
+    node('dind-template') {
+        stage('Docker dind') {
+            container('dind') {
+                docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
+                    sh("docker ps")
                 }
             }
         }
-
     }
 }
