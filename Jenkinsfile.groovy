@@ -10,8 +10,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 ,command: '/usr/local/bin/wrapdocker', ttyEnabled: true , privileged: true),
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true),
         containerTemplate(name: 'node', image: 'node:8', command: 'cat', ttyEnabled: true)
-] ,volumes: [
-        hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]) {
+] ,volumes: []) {
 
     node('jenkins-pipeline') {
 
@@ -56,12 +55,22 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             }
         }
 
-        stage('Docker dind') {
-            container('dind') {
-                docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
-                    sh("docker ps")
+        stage('Bla') {
+            podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
+                    containerTemplate(name: 'dind', image: 'odavid/jenkins-jnlp-slave:latest', envVars: [envVar(key: 'DIND', value: 'true')]
+                            ,command: '/usr/local/bin/wrapdocker', ttyEnabled: true , privileged: true)]) {
+
+                node('dind-template') {
+                    stage('Docker dind') {
+                        container('dind') {
+                            docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
+                                sh("docker ps")
+                            }
+                        }
+                    }
                 }
             }
         }
+
     }
 }
