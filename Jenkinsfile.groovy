@@ -7,7 +7,7 @@ buildInfo = Artifactory.newBuildInfo()
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true)],
-        volumes: [hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]) {
+        volumes: [hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')])
 
     node('jenkins-pipeline') {
 
@@ -60,8 +60,75 @@ podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
     node('dind-template') {
         stage('Docker dind') {
             container('dind') {
+                configFileProvider(
+                        [configFile(fileId: 'private_key', variable: 'private_key')]) {
+                    sh 'mkdir -p /etc/docker/certs.d/docker.artifactory.jfrog.com'
+                    sh "cat ${env.private_key} >> /etc/docker/certs.d/docker.artifactory.jfrog.com/artifactory.crt"
+                }
+
+                docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
                     sh("docker ps")
+                    tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+                    docker.image(tag).withRun('-p 9191:81 -e “SPRING_PROFILES_ACTIVE=local” ') { c ->
+                        sleep 10
+                        def stdout = sh(script: 'wget "http://localhost:9191/index.html"', returnStdout: true)
+                        println stdout
+//            if (stdout.contains("client-app")) {
+//                println "*** Passed Test: " + stdout
+//                println "*** Passed Test"
+//                return true
+//            } else {
+//                println "*** Failed Test: " + stdout
+//                return false
+//            }
+                    }
+                }
             }
         }
     }
 }
+
+
+podTemplate(label: 'xray-scan-pipeline' , cloud: 'k8s' , containers: [
+        containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true)],
+        volumes: [hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')])
+
+node('xray-scan-pipeline') {
+    //Scan Build Artifacts in Xray
+    stage('Xray Scan') {
+        if (XRAY_SCAN == "YES") {
+            java.util.LinkedHashMap<java.lang.String, java.lang.Boolean> xrayConfig = [
+                    'buildName' : env.JOB_NAME,
+                    'buildNumber' : env.BUILD_NUMBER,
+                    'failBuild' : false
+            ]
+            def xrayResults = server.xrayScan xrayConfig
+
+            if (xrayResults.isFoundVulnerable()) {
+                error('Stopping early… got Xray issues ')
+            }
+        } else {
+            println "No Xray scan performed. To enable set XRAY_SCAN = YES"
+        }
+    }
+}
+
+
+
+//
+//    stage('Promote Docker image') {
+//        java.util.LinkedHashMap<java.lang.String, java.lang.Object> promotionConfig = [
+//                'buildName'  : buildInfo.name,
+//                'buildNumber': buildInfo.number,
+//                'targetRepo' : "docker-prod-local",
+//                'comment'    : 'This is a stable docker image',
+//                'status'     : 'Released',
+//                'sourceRepo' : 'docker-stage-local',
+//                'copy'       : true,
+//                'failFast'   : true
+//        ]
+//
+//        server.promote promotionConfig
+//    }
+
+
