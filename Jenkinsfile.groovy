@@ -6,8 +6,7 @@ buildInfo = Artifactory.newBuildInfo()
 
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
-        containerTemplate(name: 'docker', image: 'odavid/jenkins-jnlp-slave:latest', envVars: [envVar(key: 'DIND', value: 'true')],
-                command: 'cat', ttyEnabled: true , privileged: true),
+        containerTemplate(name: 'docker', image: 'odavid/jenkins-jnlp-slave:latest', envVars: [envVar(key: 'DIND', value: 'true')], privileged: true),
         containerTemplate(name: 'node', image: 'node:8', command: 'cat', ttyEnabled: true)
 ] ,volumes: []) {
 
