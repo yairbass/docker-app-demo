@@ -6,7 +6,8 @@ buildInfo = Artifactory.newBuildInfo()
 
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
-        containerTemplate(name: 'docker', image: 'odavid/jenkins-jnlp-slave:latest', envVars: [envVar(key: 'DIND', value: 'true')], privileged: true),
+        containerTemplate(name: 'docker', image: 'odavid/jenkins-jnlp-slave:latest', envVars: [envVar(key: 'DIND', value: 'true')]
+                ,command: '/usr/local/bin/wrapdocker', ttyEnabled: true , privileged: true),
         containerTemplate(name: 'node', image: 'node:8', command: 'cat', ttyEnabled: true)
 ] ,volumes: []) {
 
@@ -35,7 +36,6 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             def rtDocker = Artifactory.docker server: server
 
             container('docker') {
-                s
                sh 'docker ps'
             }
         }
