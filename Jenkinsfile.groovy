@@ -36,6 +36,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             def rtDocker = Artifactory.docker server: server
 
             container('docker') {
+                sleep 100000;
                sh 'docker ps'
             }
         }
