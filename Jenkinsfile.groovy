@@ -95,54 +95,36 @@ podTemplate(label: 'promote-template' , cloud: 'k8s' , containers: []) {
     node('promote-template') {
         stage('Xray') {
             if (XRAY_SCAN == "YES") {
-            java.util.LinkedHashMap<java.lang.String, java.lang.Boolean> xrayConfig = [
-                    'buildName' : env.JOB_NAME,
-                    'buildNumber' : env.BUILD_NUMBER,
-                    'failBuild' : false
-            ]
-            def xrayResults = server.xrayScan xrayConfig
+                java.util.LinkedHashMap<java.lang.String, java.lang.Boolean> xrayConfig = [
+                        'buildName' : env.JOB_NAME,
+                        'buildNumber' : env.BUILD_NUMBER,
+                        'failBuild' : false
+                ]
+                def xrayResults = server.xrayScan xrayConfig
 
-            if (xrayResults.isFoundVulnerable()) {
-                error('Stopping early… got Xray issues ')
+                if (xrayResults.isFoundVulnerable()) {
+                    error('Stopping early… got Xray issues ')
+                }
+            } else {
+                println "No Xray scan performed. To enable set XRAY_SCAN = YES"
             }
-        } else {
-            println "No Xray scan performed. To enable set XRAY_SCAN = YES"
         }
+
+        stage('Promote Docker image') {
+            java.util.LinkedHashMap<java.lang.String, java.lang.Object> promotionConfig = [
+                    'buildName'  : buildInfo.name,
+                    'buildNumber': buildInfo.number,
+                    'targetRepo' : "docker-prod-local",
+                    'comment'    : 'This is a stable docker image',
+                    'status'     : 'Released',
+                    'sourceRepo' : 'docker-stage-local',
+                    'copy'       : true,
+                    'failFast'   : true
+            ]
+            server.promote promotionConfig
         }
     }
 }
 
-//    //Scan Build Artifacts in Xray
-//    stage('Xray Scan') {
-//        if (XRAY_SCAN == "YES") {
-//            java.util.LinkedHashMap<java.lang.String, java.lang.Boolean> xrayConfig = [
-//                    'buildName' : env.JOB_NAME,
-//                    'buildNumber' : env.BUILD_NUMBER,
-//                    'failBuild' : false
-//            ]
-//            def xrayResults = server.xrayScan xrayConfig
-//
-//            if (xrayResults.isFoundVulnerable()) {
-//                error('Stopping early… got Xray issues ')
-//            }
-//        } else {
-//            println "No Xray scan performed. To enable set XRAY_SCAN = YES"
-//        }
-//    }
-//
-//    stage('Promote Docker image') {
-//        java.util.LinkedHashMap<java.lang.String, java.lang.Object> promotionConfig = [
-//                'buildName'  : buildInfo.name,
-//                'buildNumber': buildInfo.number,
-//                'targetRepo' : "docker-prod-local",
-//                'comment'    : 'This is a stable docker image',
-//                'status'     : 'Released',
-//                'sourceRepo' : 'docker-stage-local',
-//                'copy'       : true,
-//                'failFast'   : true
-//        ]
-//
-//        server.promote promotionConfig
-//    }
 
 
