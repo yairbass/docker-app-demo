@@ -65,9 +65,7 @@ podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
     node('dind-template') {
         stage('Docker dind') {
             container('dind') {
-                docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
                     sh("docker ps")
-                }
             }
         }
     }
