@@ -34,9 +34,9 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             def rtDocker = Artifactory.docker server: server
 
             container('docker') {
-                docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
-                    dockerImageTag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
-                    def dockerImageTagLatest = "docker.artifactory.jfrog.com/docker-app:latest"
+                docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
+                    dockerImageTag = "docker.$rtIpAddress/docker-app:${env.BUILD_NUMBER}"
+                    def dockerImageTagLatest = "docker.$rtIpAddress/docker-app:latest"
 
                     buildInfo.env.capture = true
 
@@ -57,18 +57,18 @@ podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'dind', image: 'odavid/jenkins-jnlp-slave:latest',
                 command: '/usr/local/bin/wrapdocker', ttyEnabled: true , privileged: true)]) {
 
+
+
     node('dind-template') {
         stage('Docker dind') {
             container('dind') {
-                configFileProvider(
-                        [configFile(fileId: 'private_key', variable: 'private_key')]) {
-                    sh 'mkdir -p /etc/docker/certs.d/docker.artifactory.jfrog.com'
-                    sh "cat ${env.private_key} >> /etc/docker/certs.d/docker.artifactory.jfrog.com/artifactory.crt"
-                }
 
-                docker.withRegistry("https://docker.artifactory.jfrog.com", 'artifactorypass') {
+                sh "mkdir -p /etc/docker/certs.d/docker.$rtIpAddress"
+                sh "cat ${env.private_key} >> /etc/docker/certs.d/docker.$rtIpAddress/artifactory.crt"
+
+                docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
                     sh("docker ps")
-                    tag = "docker.artifactory.jfrog.com/docker-app:${env.BUILD_NUMBER}"
+                    tag = "docker.$rtIpAddress/docker-app:${env.BUILD_NUMBER}"
 
                     docker.image(tag).withRun('-p 9191:81 -e “SPRING_PROFILES_ACTIVE=local” ') { c ->
                         sleep 10
