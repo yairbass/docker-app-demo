@@ -40,8 +40,9 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 
                     buildInfo.env.capture = true
 
-                    docker.build(dockerImageTag)
-                    docker.build(dockerImageTagLatest)
+
+                    docker.build(dockerImageTag, "--build-arg DOCKER_REGISTRY_URL=docker.$rtIpAddress .")
+                    docker.build(dockerImageTagLatest, "--build-arg DOCKER_REGISTRY_URL=docker.$rtIpAddress .")
 
 
                     rtDocker.push(dockerImageTag, "docker-local", buildInfo)
