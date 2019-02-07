@@ -1,6 +1,6 @@
-ARG DOCKER_REGISTRY_URL=""
+#ARG DOCKER_REGISTRY_URL=""
 # Environment integration latest java 8 docker image
-FROM ${DOCKER_REGISTRY_URL}/openjdk:8u181-jre-alpine3.8
+FROM docker.artifactory.demo.jfrog.com/openjdk:8u181-jre-alpine3.8
 
 RUN apk add --update nginx && rm -rf /var/cache/apk/*
 RUN apk add --no-cache bash gawk sed grep bc coreutils
