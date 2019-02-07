@@ -35,7 +35,9 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 
             container('docker') {
                 docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
-                    dockerImageTag = "docker.$rtIpAddress/docker-app:${env.BUILD_NUMBER}"
+                    sh("chmod 777 /var/run/docker.sock")
+                    
+                    def dockerImageTag = "docker.$rtIpAddress/docker-app:${env.BUILD_NUMBER}"
                     def dockerImageTagLatest = "docker.$rtIpAddress/docker-app:latest"
 
                     buildInfo.env.capture = true
