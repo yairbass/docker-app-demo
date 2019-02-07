@@ -65,9 +65,9 @@ podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
         stage('Docker dind') {
             container('dind') {
 
-                withCredentials([string(credentialsId: 'my-secret', variable: 'PW1')]) {
+                withCredentials([string(credentialsId: 'artipublickey', variable: 'CERT')]) {
                     sh "mkdir -p /etc/docker/certs.d/docker.$rtIpAddress"
-                    sh "echo '${PW1}' |  base64 -d >> /etc/docker/certs.d/docker.$rtIpAddress/artifactory.crt"
+                    sh "echo '${CERT}' |  base64 -d >> /etc/docker/certs.d/docker.$rtIpAddress/artifactory.crt"
                 }
 
                 docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
