@@ -36,7 +36,6 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             container('docker') {
                 docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
                     sh("chmod 777 /var/run/docker.sock")
-                    
                     def dockerImageTag = "docker.$rtIpAddress/docker-app:${env.BUILD_NUMBER}"
                     def dockerImageTagLatest = "docker.$rtIpAddress/docker-app:latest"
 
@@ -56,18 +55,20 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
     }
 }
 
+
 podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'dind', image: 'odavid/jenkins-jnlp-slave:latest',
                 command: '/usr/local/bin/wrapdocker', ttyEnabled: true , privileged: true)]) {
-
 
 
     node('dind-template') {
         stage('Docker dind') {
             container('dind') {
 
-                sh "mkdir -p /etc/docker/certs.d/docker.$rtIpAddress"
-                sh "cat ${env.private_key} >> /etc/docker/certs.d/docker.$rtIpAddress/artifactory.crt"
+                withCredentials([string(credentialsId: 'my-secret', variable: 'PW1')]) {
+                    sh "mkdir -p /etc/docker/certs.d/docker.$rtIpAddress"
+                    sh "echo '${PW1}' |  base64 -d >> /etc/docker/certs.d/docker.$rtIpAddress/artifactory.crt"
+                }
 
                 docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
                     sh("docker ps")
@@ -91,7 +92,6 @@ podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
         }
     }
 }
-
 
 podTemplate(label: 'promote-template' , cloud: 'k8s' , containers: []) {
 
