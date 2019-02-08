@@ -4,6 +4,10 @@ rtIpAddress = rtFullUrl - ~/^http?.:\/\// - ~/\/artifactory$/
 
 buildInfo = Artifactory.newBuildInfo()
 
+parameters {
+    string(defaultValue: 'YES', description: '', name: 'XRAY_SCAN')
+}
+
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true)],
