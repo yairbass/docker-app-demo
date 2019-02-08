@@ -134,7 +134,7 @@ void setNewProps() {
     if  (params.XRAY == null) {
         properties([parameters([string(name: 'XRAY', defaultValue: 'YES')])])
         currentBuild.result = 'SUCCESS'
-        exit 0
+        error('Aborting the build to generate params')
     }
 }
 
