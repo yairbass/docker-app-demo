@@ -4,18 +4,13 @@ rtIpAddress = rtFullUrl - ~/^http?.:\/\// - ~/\/artifactory$/
 
 buildInfo = Artifactory.newBuildInfo()
 
+setNewProps();
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true)],
         volumes: [hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]) {
 
     node('jenkins-pipeline') {
-
-        parameters {
-            string(name: 'XRAY',
-                    defaultValue: 'YES',
-                    description: 'Do the funky xray test')
-        }
 
         stage('Cleanup') {
             cleanWs()
@@ -135,5 +130,12 @@ podTemplate(label: 'promote-template' , cloud: 'k8s' , containers: []) {
     }
 }
 
+void setNewProps() {
+    if  (params.XRAY == null) {
+        properties([parameters([string(name: 'XRAY', defaultValue: 'YES')])])
+        currentBuild.result = 'SUCCESS'
+        exit 0
+    }
+}
 
 
