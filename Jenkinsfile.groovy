@@ -131,8 +131,8 @@ podTemplate(label: 'promote-template' , cloud: 'k8s' , containers: []) {
 }
 
 void setNewProps() {
-    if  (params.XRAY == null) {
-        properties([parameters([string(name: 'XRAY_SCAN', defaultValue: 'YES')])])
+    if  (params.XRAY_SCAN == null) {
+        properties([parameters([string(name: 'XRAY_SCAN', defaultValue: 'NO')])])
         currentBuild.result = 'SUCCESS'
         error('Aborting the build to generate params')
     }
