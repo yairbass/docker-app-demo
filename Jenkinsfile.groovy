@@ -4,8 +4,6 @@ rtIpAddress = rtFullUrl - ~/^http?.:\/\// - ~/\/artifactory$/
 
 buildInfo = Artifactory.newBuildInfo()
 
-def pipelineUtils = load 'pipelineUtils.groovy'
-
 setNewProps();
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
@@ -24,6 +22,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 
         stage('Download Dependencies') {
             try {
+                def pipelineUtils = load 'pipelineUtils.groovy'
+
                 pipelineUtils.downloadArtifact(rtFullUrl, "gradle-local", "*demo-gradle/*", "jar", buildInfo, false)
                 pipelineUtils.downloadArtifact(rtFullUrl, "npm-local", "*client-app*", "tgz", buildInfo, true)
             } catch (Exception e) {
@@ -103,6 +103,7 @@ podTemplate(label: 'helm-template' , cloud: 'k8s' , containers: [
         stage('Build Chart & push it to Artifactory') {
 
             git url: 'https://github.com/eladh/docker-app-demo.git', credentialsId: 'github'
+            def pipelineUtils = load 'pipelineUtils.groovy'
 
             def version = pipelineUtils.getLatestArtifactName(rtFullUrl, "docker-local", "*docker-app*", "folder")
 
