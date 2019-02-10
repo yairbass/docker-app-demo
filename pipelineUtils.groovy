@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 
 private getLatestArtifact(serverUrl ,repoName ,artifactMatch ,type) {
     def aqlString = 'items.find ({ "repo":"' + repoName + '", "path":{"\$match":"' + artifactMatch + '"},' +
-            '"name":{"\$match":"*.' + type + '"}' +
+            '"name":{"\$match":' + type + '"}' +
             '}).include("created","path","name").sort({"\$desc":["created"]}).limit(1)'
 
 
