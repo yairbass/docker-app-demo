@@ -32,7 +32,7 @@ def executeAql(serverUrl ,aqlString) {
 }
 
 def downloadArtifact(serverUrl ,repo ,artifact ,type , buildInfo ,explode) {
-    def aqlString = 'items.find ({ "repo":"' + repoName + '", "path":{"\$match":"' + artifactMatch + '"},' +
+    def aqlString = 'items.find ({ "repo":"' + repo + '", "path":{"\$match":"' + artifact + '"},' +
             '"name":{"\$match":"*.' + type + '"}' +
             '}).include("created","path","name").sort({"\$desc":["created"]}).limit(1)'
 
