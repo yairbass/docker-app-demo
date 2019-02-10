@@ -22,8 +22,9 @@ private getLatestArtifact(serverUrl ,repoName ,artifactMatch ,type) {
             println response
             def jsonSlurper = new JsonSlurper()
             def latestArtifact = jsonSlurper.parseText("${response}")
-            
-            return latestArtifact.results[0]
+
+            println latestArtifact
+            return new HashMap<>(latestArtifact.results[0])
         } catch (Exception e) {
             println "Caught exception finding lastest artifact. Message ${e.message}"
             throw e as java.lang.Throwable
