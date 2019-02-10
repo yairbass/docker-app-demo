@@ -112,17 +112,13 @@ podTemplate(label: 'helm-template' , cloud: 'k8s' , containers: [
 
             def artifactInfo = pipelineUtils.executeAql(rtFullUrl, aqlString)
 
-            println "docker === " +  artifactInfo ? artifactInfo.name : "latest"
-
             container('helm') {
                 sh "helm init --client-only"
                 sh "helm package helm-chart-docker-app"
 
             }
             container('jfrog-cli') {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactorypass', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                    sh "jfrog rt c beta --user ${USERNAME} --password ${PASSWORD} --url ${rtFullUrl} < /dev/null"
-                }
+                pipelineUtils.pushHelmChart("helm-local" ,"helm-chart-docker-app" ,artifactInfo ? artifactInfo.name : "latest")
             }
         }
     }
