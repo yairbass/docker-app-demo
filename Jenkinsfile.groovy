@@ -94,6 +94,30 @@ podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
     }
 }
 
+podTemplate(label: 'helm-template' , cloud: 'k8s' , containers: [
+        containerTemplate(name: 'jfrog-cli', image: 'docker.bintray.io/jfrog/jfrog-cli-go:latest', command: 'cat', ttyEnabled: true) ,
+        containerTemplate(name: 'helm', image: 'alpine/helm:latest', command: 'cat', ttyEnabled: true) ]) {
+
+    node('helm-template') {
+        stage('Build Chart & push it to Artifactory') {
+
+            git url: 'https://github.com/eladh/docker-app-demo.git', credentialsId: 'github'
+
+            container('helm') {
+                sh "helm init --client-only"
+                sh "helm package helm-chart-docker-app"
+
+            }
+            container('jfrog-cli') {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactorypass', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    sh "jfrog rt c beta --user ${USERNAME} --password ${PASSWORD} --url ${rtFullUrl} < /dev/null"
+                }
+            }
+        }
+    }
+}
+
+
 podTemplate(label: 'promote-template' , cloud: 'k8s' , containers: []) {
 
     node('promote-template') {
