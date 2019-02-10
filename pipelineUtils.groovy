@@ -1,8 +1,8 @@
 
 import groovy.json.JsonSlurper
 
-private getLatestArtifact (serverUrl ,repoName ,match ,type) {
-    def aqlString = 'items.find ({ "repo":"' + repoName + '", "path":{"\$match":"' + match + '"},' +
+private getLatestArtifact(serverUrl ,repoName ,artifactMatch ,type) {
+    def aqlString = 'items.find ({ "repo":"' + repoName + '", "path":{"\$match":"' + artifactMatch + '"},' +
             '"name":{"\$match":"*.' + type + '"}' +
             '}).include("created","path","name").sort({"\$desc":["created"]}).limit(1)'
 
@@ -22,8 +22,8 @@ private getLatestArtifact (serverUrl ,repoName ,match ,type) {
             println response
             def jsonSlurper = new JsonSlurper()
             def latestArtifact = jsonSlurper.parseText("${response}")
-            def path = latestArtifact.results[0].path + "/" + latestArtifact.results[0].name
-            return path
+
+            return results[0];
         } catch (Exception e) {
             println "Caught exception finding lastest artifact. Message ${e.message}"
             throw e as java.lang.Throwable
@@ -31,8 +31,15 @@ private getLatestArtifact (serverUrl ,repoName ,match ,type) {
     }
 }
 
+def getLatestArtifactName(serverUrl ,repo ,artifact ,type) {
+    def artifactInfo = getLatestArtifact(serverUrl , repo , artifact , type)
+    return artifactInfo ? artifactInfo.name:"latest"
+}
+
 def downloadArtifact(serverUrl ,repo ,artifact ,type , buildInfo ,explode) {
-    def lastArtifact = getLatestArtifact(serverUrl , repo , artifact , type)
+    def artifactInfo = getLatestArtifact(serverUrl , repo , artifact , type)
+    def lastArtifact = artifactInfo.path + "/" + artifactInfo.name
+
     def latestVer = repo +  "/" + lastArtifact
 
     def downloadConfig = """{
