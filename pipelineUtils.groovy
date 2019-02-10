@@ -1,12 +1,7 @@
 
 import groovy.json.JsonSlurper
 
-private getLatestArtifact(serverUrl ,repoName ,artifactMatch ,type) {
-    def aqlString = 'items.find ({ "repo":"' + repoName + '", "path":{"\$match":"' + artifactMatch + '"},' +
-            '"name":{"\$match":' + type + '"}' +
-            '}).include("created","path","name").sort({"\$desc":["created"]}).limit(1)'
-
-
+private getLatestArtifact(serverUrl ,aqlString) {
     File aqlFile = File.createTempFile("aql-query", ".tmp")
     aqlFile.deleteOnExit()
     aqlFile << aqlString
@@ -32,13 +27,16 @@ private getLatestArtifact(serverUrl ,repoName ,artifactMatch ,type) {
     }
 }
 
-def getLatestArtifactName(serverUrl ,repo ,artifact ,type) {
-    def artifactInfo = getLatestArtifact(serverUrl , repo , artifact , type)
-    return artifactInfo ? artifactInfo.name:"latest"
+def executeAql(serverUrl ,aqlString) {
+    return getLatestArtifact(serverUrl , aqlString)
 }
 
 def downloadArtifact(serverUrl ,repo ,artifact ,type , buildInfo ,explode) {
-    def artifactInfo = getLatestArtifact(serverUrl , repo , artifact , type)
+    def aqlString = 'items.find ({ "repo":"' + repoName + '", "path":{"\$match":"' + artifactMatch + '"},' +
+            '"name":{"\$match":"*.' + type + '"}' +
+            '}).include("created","path","name").sort({"\$desc":["created"]}).limit(1)'
+
+    def artifactInfo = getLatestArtifact(serverUrl ,aqlString)
     def lastArtifact = artifactInfo.path + "/" + artifactInfo.name
 
     def latestVer = repo +  "/" + lastArtifact
