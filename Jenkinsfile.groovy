@@ -111,14 +111,15 @@ podTemplate(label: 'helm-template' , cloud: 'k8s' , containers: [
 
 
             def artifactInfo = pipelineUtils.executeAql(rtFullUrl, aqlString)
+            def dockerTag = artifactInfo ? artifactInfo.name : "latest"
 
             container('helm') {
                 sh "helm init --client-only"
+                sh "sed -i 's/latest/${dockerTag}/g' helm-chart-docker-app/values.yaml"
                 sh "helm package helm-chart-docker-app"
-
             }
             container('jfrog-cli') {
-                pipelineUtils.pushHelmChart("helm-local" ,"helm-chart-docker-app" ,artifactInfo ? artifactInfo.name : "latest")
+                pipelineUtils.pushHelmChart("helm-local" ,"helm-chart-docker-app" ,dockerTag)
             }
         }
     }
