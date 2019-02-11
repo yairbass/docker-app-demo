@@ -59,10 +59,10 @@ def pushHelmChart(repo ,artifact ,version) {
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactorypass', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
         sh "jfrog rt c beta --user ${USERNAME} --password ${PASSWORD} --url ${rtFullUrl} < /dev/null"
-        sh "./jfrog rt u '*.${env.BUILD_NUMBER}.tgz' ${repo} --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER} -server-id beta --props='release-bundle=true'"
-        sh "./jfrog rt bce ${env.JOB_NAME} ${env.BUILD_NUMBER} "
-        sh "./jfrog rt dl ${repo}/${artifact}/${version}/manifest.json --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER} -server-id beta"
-        sh "./jfrog rt bp ${env.JOB_NAME} ${env.BUILD_NUMBER} -server-id beta"
+        sh "jfrog rt u '*.${env.BUILD_NUMBER}.tgz' ${repo} --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER} -server-id beta --props='release-bundle=true'"
+        sh "jfrog rt bce ${env.JOB_NAME} ${env.BUILD_NUMBER} "
+        sh "jfrog rt dl ${repo}/${artifact}/${version}/manifest.json --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER} -server-id beta"
+        sh ".jfrog rt bp ${env.JOB_NAME} ${env.BUILD_NUMBER} -server-id beta"
     }
 
 }
