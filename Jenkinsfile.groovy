@@ -23,18 +23,12 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         stage('Download Dependencies') {
             try {
                 def pipelineUtils = load 'pipelineUtils.groovy'
-
-                pipelineUtils.downloadArtifact(rtFullUrl, "gradle-local", "*demo-gradle/*", "jar", buildInfo, false)
-                pipelineUtils.downloadArtifact(rtFullUrl, "npm-local", "*client-app*", "tgz", buildInfo, true)
+                pipelineUtils.downloadArtifact(rtFullUrl, "maven-release-local", "*spring-petclinic*", "jar", buildInfo, true)
             } catch (Exception e) {
                 println "Caught Exception during resolution. Message ${e.message}"
                 throw e as java.lang.Throwable
             }
         }
-        
-            stage('Download Maven Artifact') {
-                def latestMvnArt = "curl -X GET http://$artifactory/artifactory/api/storage/maven-release-local/org/springframework/samples/spring-petclinic/2.1.0.BUILD-SNAPSHOT/ |jq ".children[-1]"| jq .uri"
-            }    
             
         stage('Docker build') {
             def rtDocker = Artifactory.docker server: server
