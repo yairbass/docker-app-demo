@@ -17,7 +17,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         }
 
         stage('Clone sources') {
-            git url: 'https://github.com/eladh/docker-app-demo.git', credentialsId: 'github'
+            git url: 'https://github.com/yairbass/docker-app-demo.git', credentialsId: 'github'
         }
 
         stage('Download Dependencies') {
@@ -31,7 +31,11 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 throw e as java.lang.Throwable
             }
         }
-
+        
+            stage('Download Maven Artifact') {
+                def latestMvnArt = "curl -X GET http://$artifactory/artifactory/api/storage/maven-release-local/org/springframework/samples/spring-petclinic/2.1.0.BUILD-SNAPSHOT/ |jq ".children[-1]"| jq .uri"
+            }    
+            
         stage('Docker build') {
             def rtDocker = Artifactory.docker server: server
 
