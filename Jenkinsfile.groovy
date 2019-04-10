@@ -56,42 +56,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
 }
 
 
-podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
-        containerTemplate(name: 'dind', image: 'odavid/jenkins-jnlp-slave:latest',
-                command: '/usr/local/bin/wrapdocker', ttyEnabled: true , privileged: true)]) {
 
-
-    node('dind-template') {
-        stage('Docker dind') {
-            container('dind') {
-
-                withCredentials([string(credentialsId: 'artipublickey', variable: 'CERT')]) {
-                    sh "mkdir -p /etc/docker/certs.d/docker.$rtIpAddress"
-                    sh "echo '${CERT}' |  base64 -d >> /etc/docker/certs.d/docker.$rtIpAddress/artifactory.crt"
-                }
-
-                docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
-                    sh("docker ps")
-                    tag = "docker.$rtIpAddress/petclinic-app:${env.BUILD_NUMBER}"
-
-                    docker.image(tag).withRun('-p 9191:81 -e “SPRING_PROFILES_ACTIVE=local” ') { c ->
-                        sleep 10
-                        def stdout = sh(script: 'curl http://localhost:9191/index.html', returnStdout: true)
-                        println stdout
-                        if (stdout.contains("client-app")) {
-                            println "*** Passed Test: " + stdout
-                            println "*** Passed Test"
-                            return true
-                        } else {
-                            println "*** Failed Test: " + stdout
-                            return false
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 podTemplate(label: 'promote-template' , cloud: 'k8s' , containers: []) {
 
