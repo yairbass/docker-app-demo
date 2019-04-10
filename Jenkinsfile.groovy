@@ -37,7 +37,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                 docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
                     sh("chmod 777 /var/run/docker.sock")
                     def dockerImageTag = "docker.$rtIpAddress/petclinic-app:${env.BUILD_NUMBER}"
-                    def dockerImageTagLatest = "docker.$rtIpAddress/petclinic:latest"
+                    def dockerImageTagLatest = "docker.$rtIpAddress/petclinic-app:latest"
 
                     buildInfo.env.capture = true
 
