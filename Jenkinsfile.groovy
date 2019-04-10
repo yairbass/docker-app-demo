@@ -36,8 +36,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             container('docker') {
                 docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
                     sh("chmod 777 /var/run/docker.sock")
-                    def dockerImageTag = "docker.$rtIpAddress/docker-app:${env.BUILD_NUMBER}"
-                    def dockerImageTagLatest = "docker.$rtIpAddress/docker-app:latest"
+                    def dockerImageTag = "docker.$rtIpAddress/petclinic-app:${env.BUILD_NUMBER}"
+                    def dockerImageTagLatest = "docker.$rtIpAddress/petclinic:latest"
 
                     buildInfo.env.capture = true
 
@@ -72,7 +72,7 @@ podTemplate(label: 'dind-template' , cloud: 'k8s' , containers: [
 
                 docker.withRegistry("https://docker.$rtIpAddress", 'artifactorypass') {
                     sh("docker ps")
-                    tag = "docker.$rtIpAddress/docker-app:${env.BUILD_NUMBER}"
+                    tag = "docker.$rtIpAddress/petclinic-app:${env.BUILD_NUMBER}"
 
                     docker.image(tag).withRun('-p 9191:81 -e “SPRING_PROFILES_ACTIVE=local” ') { c ->
                         sleep 10
