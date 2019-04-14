@@ -50,4 +50,27 @@ def downloadArtifact(serverUrl ,repo ,artifact ,type , buildInfo ,explode) {
     server.download(downloadConfig, buildInfo)
 }
 
+def downloaData(serverUrl ,repo ,artifact ,type , buildInfo ,explode) {
+    def aqlString = 'items.find ({ "repo":"' + repo + '", "path":{"\$match":"' + artifact + '"},' +
+            '"name":{"\$match":"*.' + type + '"}' +
+            '}).include("created","path","name").sort({"\$desc":["created"]}).limit(1)'
+
+    def artifactInfo = getLatestArtifact(serverUrl ,aqlString)
+    def lastArtifact = artifactInfo.path + "/" + artifactInfo.name
+
+    def latestVer = repo +  "/" + lastArtifact
+
+    def downloadConfig = """{
+                 "files": [
+                 {
+                 "pattern": "${latestVer}",
+                 "flat": "true",
+                 "explode": "${explode}"
+                 }
+                 ]
+             }"""
+
+    server.download(downloadConfig, buildInfo)
+}
+
 return this

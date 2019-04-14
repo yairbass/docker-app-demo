@@ -24,8 +24,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             try {
                 def pipelineUtils = load 'pipelineUtils.groovy'
                 pipelineUtils.downloadArtifact(rtFullUrl, "maven-release-local", "*spring-petclinic*", "jar", buildInfo, false)
-              //  pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", "dbdata", "", buildInfo, false)
-              //  pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", "src", "", buildInfo, false)
+//                pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", "dbdata", "/", buildInfo, false)
+//                pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", "src", "/", buildInfo, false)
 
             } catch (Exception e) {
                 println "Caught Exception during resolution. Message ${e.message}"
