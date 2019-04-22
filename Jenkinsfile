@@ -4,7 +4,7 @@ rtIpAddress = rtFullUrl - ~/^http?.:\/\// - ~/\/artifactory$/
 
 buildInfo = Artifactory.newBuildInfo()
 
-setNewProps();
+setNewProps()
 
 podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true , privileged: true)],
@@ -24,9 +24,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             try {
                 def pipelineUtils = load 'pipelineUtils.groovy'
                 pipelineUtils.downloadArtifact(rtFullUrl, "maven-release-local", "*spring-petclinic*", "*jar*", buildInfo, false)
-                pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", ".", "*src*", buildInfo, false)
-                sh ("tar -zxf src.tgz")
-
+                pipelineUtils.downloadData(rtFullUrl, "data-generic-repo", ".", "*src*", buildInfo, true)
+                sh "ls"
             } catch (Exception e) {
                 println "Caught Exception during resolution. Message ${e.message}"
                 throw e as java.lang.Throwable
