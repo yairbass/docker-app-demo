@@ -23,9 +23,10 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         stage('Download Dependencies') {
             try {
                 def pipelineUtils = load 'pipelineUtils.groovy'
+                pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", "src", "*tgz*", buildInfo, true)
                 pipelineUtils.downloadArtifact(rtFullUrl, "maven-release-local", "*spring-petclinic*", "*jar*", buildInfo, false)
-                pipelineUtils.downloadData(rtFullUrl, "data-generic-repo", ".", "*src*", buildInfo, true)
                 sh "ls"
+                    
             } catch (Exception e) {
                 println "Caught Exception during resolution. Message ${e.message}"
                 throw e as java.lang.Throwable
