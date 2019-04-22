@@ -24,8 +24,8 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
             try {
                 def pipelineUtils = load 'pipelineUtils.groovy'
                 pipelineUtils.downloadArtifact(rtFullUrl, "maven-release-local", "*spring-petclinic*", "jar", buildInfo, false)
-//                pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", "dbdata", "/", buildInfo, false)
-//                pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", "src", "/", buildInfo, false)
+                pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", "src*", "tgz", buildInfo, false)
+                sh ("tar -zxf src.tgz")
 
             } catch (Exception e) {
                 println "Caught Exception during resolution. Message ${e.message}"
@@ -41,14 +41,9 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
                     sh("chmod 777 /var/run/docker.sock")
                     def dockerImageTag = "docker.$rtIpAddress/petclinic-app:${env.BUILD_NUMBER}"
                     def dockerImageTagLatest = "docker.$rtIpAddress/petclinic-app:latest"
-
                     buildInfo.env.capture = true
-
-
                     docker.build(dockerImageTag, "--build-arg DOCKER_REGISTRY_URL=docker.$rtIpAddress .")
                     docker.build(dockerImageTagLatest, "--build-arg DOCKER_REGISTRY_URL=docker.$rtIpAddress .")
-
-
                     rtDocker.push(dockerImageTag, "docker-local", buildInfo)
                     rtDocker.push(dockerImageTagLatest, "docker-local", buildInfo)
                     server.publishBuildInfo buildInfo
