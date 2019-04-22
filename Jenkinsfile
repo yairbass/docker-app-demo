@@ -23,7 +23,7 @@ podTemplate(label: 'jenkins-pipeline' , cloud: 'k8s' , containers: [
         stage('Download Dependencies') {
             try {
                 def pipelineUtils = load 'pipelineUtils.groovy'
-                pipelineUtils.downloadArtifact(rtFullUrl, "maven-release-local", "*spring-petclinic*", "jar", buildInfo, false)
+                pipelineUtils.downloadArtifact(rtFullUrl, "maven-release-local", "*spring-petclinic*", "*jar*", buildInfo, false)
                 pipelineUtils.downloadArtifact(rtFullUrl, "data-generic-repo", ".", "*src*", buildInfo, false)
                 sh ("tar -zxf src.tgz")
 
