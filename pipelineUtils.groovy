@@ -29,7 +29,7 @@ private getLatestArtifact(serverUrl ,aqlString) {
 
 def downloadArtifact(serverUrl ,repo ,artifact ,type , buildInfo ,explode) {
     def aqlString = 'items.find ({ "repo":"' + repo + '", "path":{"\$match":"' + artifact + '"},' +
-            '"name":{"\$match":"*.' + type + '"}' +
+            '"name":{"\$match":"'+ type + '"}' +
             '}).include("created","path","name").sort({"\$desc":["created"]}).limit(1)'
 
     def artifactInfo = getLatestArtifact(serverUrl ,aqlString)
